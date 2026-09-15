@@ -143,12 +143,6 @@ Only the `fetch_stork_price` tool needs a key. It makes a live authenticated cal
 }
 ```
 
-With Claude Code you can pass it inline instead:
-
-```bash
-claude mcp add horizen -e STORK_API_KEY=your-stork-api-key -- npx -y @horizen/horizen-mcp
-```
-
 The key is read from the environment and is never passed as a tool argument, so it stays out of the model's context and your chat history. Every other tool works without it. If your config file is committed to git (for example a project `.mcp.json`), reference the variable rather than hardcoding the key, e.g. `"STORK_API_KEY": "${STORK_API_KEY}"`, so the secret stays out of the repo.
 
 ---
@@ -189,17 +183,17 @@ Once connected, your agent has access to Horizen chain facts through natural lan
 
 ## Tools
 
-| Tool | What it does |
-|---|---|
-| `get_chain_info` | Chain ID, RPC/WS URLs, explorer, gas token, settlement layer for mainnet or testnet |
-| `get_contract_address` | Verified address for a given contract + network. Returns explicit not-found on miss, never fabricates. |
-| `list_contracts` | All contracts in the registry with per-network deployment status |
-| `get_token_info` | Addresses and decimals for ZEN, cbBTC, USDC.e on Horizen, plus cross-chain addresses |
-| `get_stork_feed_id` | Stork oracle feed ID for an asset (e.g. `ETHUSD`), computed via keccak256 |
-| `get_bridge_info` | Bridge URLs, supported assets, and caveats: native bridge vs. Stargate |
-| `get_integration_info` | Docs paths, access method, status for Stork, Goldsky, PureFi, Den, zkVerify |
-| `fetch_stork_price` | Live authenticated pull from the Stork REST API for a signed price update. Network call; reads `STORK_API_KEY` from the environment. |
-| `check_zkverify_status` | Reads the zkVerify aggregation proxy on Horizen to confirm a proof aggregation. On-chain read. |
+| Tool                    | What it does                                                                                                                         |
+|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `get_chain_info`        | Chain ID, RPC/WS URLs, explorer, gas token, settlement layer for mainnet or testnet                                                  |
+| `get_contract_address`  | Verified address for a given contract + network. Returns explicit not-found on miss, never fabricates.                               |
+| `list_contracts`        | All contracts in the registry with per-network deployment status                                                                     |
+| `get_token_info`        | Addresses and decimals for ZEN, cbBTC, USDC.e on Horizen, plus cross-chain addresses                                                 |
+| `get_stork_feed_id`     | Stork oracle feed ID for an asset (e.g. `ETHUSD`), computed via keccak256                                                            |
+| `get_bridge_info`       | Bridge URLs, supported assets, and caveats: native bridge vs. Stargate                                                               |
+| `get_integration_info`  | Docs paths, access method, status for Stork, Goldsky, PureFi, Den, zkVerify                                                          |
+| `fetch_stork_price`     | Live authenticated pull from the Stork REST API for a signed price update. Network call; reads `STORK_API_KEY` from the environment. |
+| `check_zkverify_status` | Reads the zkVerify aggregation proxy on Horizen to confirm a proof aggregation. On-chain read.                                       |
 
 Most tools are offline lookups against the bundled registry. `fetch_stork_price` (Stork REST API) and `check_zkverify_status` (on-chain read) are the two that make live network calls.
 
