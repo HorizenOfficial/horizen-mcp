@@ -2,11 +2,11 @@ name: Build, Test and Publish
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
   pull_request:
-    branches: [main, dev]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -16,15 +16,15 @@ jobs:
 
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
           cache: 'npm'
@@ -55,17 +55,17 @@ jobs:
 
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
@@ -74,7 +74,6 @@ jobs:
         env:
           MAINTAINERS_KEYS: ${{ vars.MAINTAINERS_KEYS }}
           PROD_RELEASE_BRANCH: main
-          DEV_RELEASE_BRANCH: dev
         run: source "${GITHUB_WORKSPACE}/ci/setup_env.sh"
 
       - name: Publish NPM Package
