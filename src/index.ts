@@ -28,10 +28,13 @@ import { tokenInputSchema, handleGetTokenInfo } from "./tools/tokens.js";
 
 const SERVER_INSTRUCTIONS = `Horizen chain reference data. All values include \`source\` and \`verified\` fields; surface them when reporting facts to the user. This server provides reference data plus two read-only live lookups (a Stork REST price pull and a zkVerify aggregation-status read). It never constructs, signs, or broadcasts transactions. Values not present in this server must not be inferred; query again with different parameters, or tell the user the value is unavailable. Some integrations are live on Horizen but not yet documented in Horizen's own docs. For these, referencePath and tutorialPath are null while status is "live". Report these as available-but-undocumented and direct the user to externalDocs. Never construct a docs.horizen.io URL that is not present in this registry.`;
 
-const server = new McpServer({
-  name: "horizen-mcp",
-  version,
-});
+const server = new McpServer(
+  {
+    name: "horizen-mcp",
+    version,
+  },
+  { instructions: SERVER_INSTRUCTIONS }
+);
 
 server.tool(
   "get_chain_info",

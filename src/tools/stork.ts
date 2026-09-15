@@ -9,7 +9,10 @@ const STORK_HOST_SUFFIX = ".stork-oracle.network";
 // under prompt injection) pointing baseUrl at an attacker-controlled server.
 function isStorkHost(rawUrl: string): boolean {
   try {
-    const host = new URL(rawUrl).hostname;
+    const parsed = new URL(rawUrl);
+    // https only: never expose the Authorization header over cleartext.
+    if (parsed.protocol !== "https:") return false;
+    const host = parsed.hostname;
     return host === "stork-oracle.network" || host.endsWith(STORK_HOST_SUFFIX);
   } catch {
     return false;

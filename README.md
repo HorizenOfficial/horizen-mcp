@@ -100,18 +100,13 @@ Open the Cline extension, go to the **MCP Servers** tab, choose **Edit MCP Setti
 
 ### Continue (VS Code / JetBrains)
 
-Add to `~/.continue/config.json`:
+Add to `~/.continue/config.yaml`:
 
-```json
-{
-  "mcpServers": [
-    {
-      "name": "horizen",
-      "command": "npx",
-      "args": ["-y", "@horizen/horizen-mcp"]
-    }
-  ]
-}
+```yaml
+mcpServers:
+  - name: horizen
+    command: npx
+    args: ["-y", "@horizen/horizen-mcp"]
 ```
 
 ### Zed
@@ -122,10 +117,9 @@ Add to `~/.config/zed/settings.json`:
 {
   "context_servers": {
     "horizen": {
-      "command": {
-        "path": "npx",
-        "args": ["-y", "@horizen/horizen-mcp"]
-      }
+      "command": "npx",
+      "args": ["-y", "@horizen/horizen-mcp"],
+      "env": {}
     }
   }
 }
@@ -149,7 +143,13 @@ Only the `fetch_stork_price` tool needs a key. It makes a live authenticated cal
 }
 ```
 
-The key is read from the environment and is never passed as a tool argument, so it stays out of the model's context and your chat history. Every other tool works without it.
+With Claude Code you can pass it inline instead:
+
+```bash
+claude mcp add horizen -e STORK_API_KEY=your-stork-api-key -- npx -y @horizen/horizen-mcp
+```
+
+The key is read from the environment and is never passed as a tool argument, so it stays out of the model's context and your chat history. Every other tool works without it. If your config file is committed to git (for example a project `.mcp.json`), reference the variable rather than hardcoding the key, e.g. `"STORK_API_KEY": "${STORK_API_KEY}"`, so the secret stays out of the repo.
 
 ---
 

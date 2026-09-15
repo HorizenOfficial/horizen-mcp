@@ -87,6 +87,7 @@ test("server boots and registers every tool", async () => {
 
   const init = messages.find((m) => m.id === 1)?.result;
   assert.ok(init?.serverInfo?.version, `server did not report a version (stderr: ${err.slice(0, 200)})`);
+  assert.match(init?.instructions ?? "", /reference data/i, "server should expose usage instructions to clients");
 
   const tools = messages.find((m) => m.id === 2)?.result?.tools ?? [];
   assert.deepEqual(
