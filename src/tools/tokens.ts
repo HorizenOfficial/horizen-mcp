@@ -3,7 +3,7 @@ import { getToken, getKnownTokenKeys } from "../registry.js";
 
 export const tokenInputSchema = z.object({
   token: z.enum(["zen", "cbtc", "usdce"]).optional().describe(
-    "Token key: zen (ZEN governance token), cbtc (cbBTC, Coinbase Bitcoin, 8 decimals), usdce (USDC.e, bridged USDC, 6 decimals). Omit to list all tokens."
+    "Token key: zen (ZEN governance token), cbtc (cbBTC — Coinbase Bitcoin, 8 decimals), usdce (USDC.e — bridged USDC, 6 decimals). Omit to list all tokens."
   ),
   network: z.enum(["mainnet", "testnet"]).optional().default("mainnet").describe(
     "Which network's addresses to return. Defaults to mainnet."

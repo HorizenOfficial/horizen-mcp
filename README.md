@@ -21,11 +21,7 @@ Published on npm as [`@horizen/horizen-mcp`](https://www.npmjs.com/package/@hori
 
 ### Claude Code
 
-```bash
-claude mcp add horizen -- npx -y @horizen/horizen-mcp
-```
-
-Or add it to your project's `.mcp.json`:
+Add it to your project's `.mcp.json`:
 
 ```json
 {

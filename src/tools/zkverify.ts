@@ -45,7 +45,7 @@ export const zkVerifyStatusInputSchema = z.object({
   domainId: z
     .string()
     .regex(/^\d+$/, "domainId must be a decimal integer (uint256)")
-    .describe("zkVerify domain ID that identifies the aggregation domain. Obtained from the zkVerify SDK after proof submission."),
+    .describe("zkVerify domain ID — identifies the aggregation domain. Obtained from the zkVerify SDK after proof submission."),
   aggregationId: z
     .string()
     .regex(/^\d+$/, "aggregationId must be a decimal integer (uint256)")
