@@ -2,9 +2,9 @@
 
 [![npm](https://img.shields.io/npm/v/@horizen/horizen-mcp)](https://www.npmjs.com/package/@horizen/horizen-mcp)
 
-An [MCP server](https://modelcontextprotocol.io) that gives coding agents accurate, sourced facts about the Horizen chain, so they stop guessing.
+An [MCP server](https://modelcontextprotocol.io) that gives coding agents accurate, sourced facts about the Horizen chain — so they stop guessing.
 
-When you ask an agent to deploy a contract on Horizen, configure a bridge, or integrate Stork oracle or zkVerify, it needs ground truth: the right chain ID, the right RPC URL, the right contract address. This server provides that: typed, versioned, with explicit provenance on every value. If something isn't in the registry, the agent is told so explicitly rather than making something up.
+When you ask an agent to deploy a contract on Horizen, configure a bridge, or integrate Stork oracle or zkVerify, it needs ground truth: the right chain ID, the right RPC URL, the right contract address. This server provides that — typed, versioned, with explicit provenance on every value. If something isn't in the registry, the agent is told so explicitly rather than making something up.
 
 ---
 
@@ -121,7 +121,7 @@ Add to `~/.config/zed/settings.json`:
 }
 ```
 
-Restart your editor after saving. The server starts on demand, with no separate process to manage.
+Restart your editor after saving. The server starts on demand — no separate process to manage.
 
 ### Stork API key (for `fetch_stork_price`)
 
@@ -182,18 +182,18 @@ Once connected, your agent has access to Horizen chain facts through natural lan
 | Tool                    | What it does                                                                                                                         |
 |-------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
 | `get_chain_info`        | Chain ID, RPC/WS URLs, explorer, gas token, settlement layer for mainnet or testnet                                                  |
-| `get_contract_address`  | Verified address for a given contract + network. Returns explicit not-found on miss, never fabricates.                               |
+| `get_contract_address`  | Verified address for a given contract + network. Returns explicit not-found on miss — never fabricates.                              |
 | `list_contracts`        | All contracts in the registry with per-network deployment status                                                                     |
 | `get_token_info`        | Addresses and decimals for ZEN, cbBTC, USDC.e on Horizen, plus cross-chain addresses                                                 |
 | `get_stork_feed_id`     | Stork oracle feed ID for an asset (e.g. `ETHUSD`), computed via keccak256                                                            |
-| `get_bridge_info`       | Bridge URLs, supported assets, and caveats: native bridge vs. Stargate                                                               |
+| `get_bridge_info`       | Bridge URLs, supported assets, and caveats — native bridge vs. Stargate                                                              |
 | `get_integration_info`  | Docs paths, access method, status for Stork, Goldsky, PureFi, Den, zkVerify                                                          |
 | `fetch_stork_price`     | Live authenticated pull from the Stork REST API for a signed price update. Network call; reads `STORK_API_KEY` from the environment. |
 | `check_zkverify_status` | Reads the zkVerify aggregation proxy on Horizen to confirm a proof aggregation. On-chain read.                                       |
 
 Most tools are offline lookups against the bundled registry. `fetch_stork_price` (Stork REST API) and `check_zkverify_status` (on-chain read) are the two that make live network calls.
 
-Every registry response includes a `source` field and a `verified` date. If a value isn't in the registry, the agent gets an explicit not-found with a list of what is known, never a guess.
+Every response includes a `source` field and a `verified` date. If a value isn't in the registry, the agent gets an explicit not-found with a list of what is known — never a guess.
 
 ---
 
@@ -225,7 +225,7 @@ To point your editor at a local build instead of npm:
 ## Development
 
 ```bash
-npm run dev        # watch mode, recompiles on save
+npm run dev        # watch mode — recompiles on save
 npm run inspect    # MCP Inspector UI for interactive tool testing
 npm test           # smoke test: builds, boots the server, and lists its tools
 ```
@@ -236,9 +236,9 @@ The Inspector lets you call any tool directly and inspect the full JSON response
 
 ## Data
 
-All facts live in [`data/chain-facts.json`](data/chain-facts.json). Tool handlers query this file; nothing is hardcoded in source. To update a value, edit that file and run `npm run build`.
+All facts live in [`data/chain-facts.json`](data/chain-facts.json). Tool handlers query this file — nothing is hardcoded in source. To update a value, edit that file and run `npm run build`.
 
-Every entry carries a `source` (URL or attribution) and a `verified` date. Values that haven't been confirmed are left as `null` rather than guessed; the tool will tell the agent the value is unknown rather than returning something fabricated.
+Every entry carries a `source` (URL or attribution) and a `verified` date. Values that haven't been confirmed are left as `null` rather than guessed — the tool will tell the agent the value is unknown rather than returning something fabricated.
 
 ---
 
