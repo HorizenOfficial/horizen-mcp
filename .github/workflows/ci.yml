@@ -12,10 +12,10 @@ on:
       - 'LICENSE'
       - '.gitignore'
 
-# Serialize all release (tag) runs into one group so two tags never publish
-# concurrently; for branches/PRs, cancel superseded runs.
+# Cancel an older run when a new commit lands on the same branch or PR.
+# Tags are never cancelled, so a release in progress always finishes.
 concurrency:
-  group: ${{ startsWith(github.ref, 'refs/tags/') && format('{0}-release', github.workflow) || format('{0}-{1}', github.workflow, github.ref) }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
