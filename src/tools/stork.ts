@@ -2,14 +2,30 @@ import { z } from "zod";
 import { keccak256, toBytes } from "viem";
 import { getFeed } from "../registry.js";
 
+const STORK_HOST_SUFFIX = ".stork-oracle.network";
+
+// The API key is a bearer credential, so it must only ever be sent to a Stork
+// host. This guards both the schema and the runtime path against an agent (e.g.
+// under prompt injection) pointing baseUrl at an attacker-controlled server.
+function isStorkHost(rawUrl: string): boolean {
+  try {
+    const host = new URL(rawUrl).hostname;
+    return host === "stork-oracle.network" || host.endsWith(STORK_HOST_SUFFIX);
+  } catch {
+    return false;
+  }
+}
+
 export const storkPriceInputSchema = z.object({
   assetId: z.string().regex(/^[A-Z0-9]+$/, "assetId must be uppercase alphanumeric, e.g. ETHUSD"),
-  apiKey: z.string().min(1, "Stork API key is required for authenticated price fetch"),
   baseUrl: z
     .string()
     .url("baseUrl must be a valid URL")
+    .refine(isStorkHost, "baseUrl host must be stork-oracle.network or a *.stork-oracle.network subdomain")
     .optional()
-    .describe("Stork REST API base URL. Defaults to https://rest.jp.stork-oracle.network"),
+    .describe(
+      "Stork REST API base URL. Must be a stork-oracle.network host. Defaults to https://rest.jp.stork-oracle.network. The API key is read from the STORK_API_KEY environment variable, not passed as an argument."
+    ),
 });
 
 // Source: https://docs.stork.network/api-reference/rest-api.md
@@ -75,10 +91,26 @@ function formatPrice(rawPrice: string): string {
 
 export async function handleFetchStorkPrice(input: {
   assetId: string;
-  apiKey: string;
   baseUrl?: string;
 }) {
+  const apiKey = process.env.STORK_API_KEY;
+  if (!apiKey) {
+    return {
+      success: false,
+      error:
+        "STORK_API_KEY is not set. Add it to the horizen MCP server's environment (the env block in your client config) to enable live Stork price pulls.",
+    };
+  }
+
   const baseUrl = input.baseUrl ?? "https://rest.jp.stork-oracle.network";
+  // Defense in depth: never send the credential anywhere but a Stork host,
+  // even if schema validation was somehow bypassed.
+  if (!isStorkHost(baseUrl)) {
+    return {
+      success: false,
+      error: `Refusing to send Stork credentials to a non-Stork host: ${baseUrl}`,
+    };
+  }
   const url = `${baseUrl}/v1/prices/latest?assets=${encodeURIComponent(input.assetId)}`;
 
   // Compute feed ID locally for cross-check — keccak256(assetId as UTF-8 bytes)
@@ -88,7 +120,7 @@ export async function handleFetchStorkPrice(input: {
   // Stork REST API auth: pass the API key directly after "Basic ".
   // Confirmed from working integration (price-triggered-escrow tutorial).
   // Do NOT base64-encode — use the raw key as-is.
-  const authHeader = `Basic ${input.apiKey}`;
+  const authHeader = `Basic ${apiKey}`;
 
   let response: Response;
   try {
