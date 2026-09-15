@@ -29,10 +29,10 @@ if [ -z "${github_token}" ]; then
 fi
 
 log_info "=== Generating GitHub Release ${github_tag} for ${repo_slug} ==="
-curl -s --fail-with-body -X POST \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: token ${github_token}" \
-  "https://api.github.com/repos/${repo_slug}/releases" \
-  -d "{\"tag_name\":\"${github_tag}\",\"generate_release_notes\":true}"
+gh release create "${github_tag}" \
+  --repo "${repo_slug}" \
+  --title "${github_tag}" \
+  --generate-notes \
+  --verify-tag || fn_die "Failed to create GitHub release ${github_tag}."
 
 exit 0
