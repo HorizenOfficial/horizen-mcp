@@ -1,12 +1,17 @@
 {
   "name": "@horizen/horizen-mcp",
   "version": "0.2.0",
-  "description": "Horizen chain reference data for coding agents — MCP server",
+  "description": "MCP server providing sourced Horizen chain reference data for coding agents",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HorizenOfficial/horizen-mcp.git"
   },
+  "homepage": "https://github.com/HorizenOfficial/horizen-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/HorizenOfficial/horizen-mcp/issues"
+  },
+  "author": "Horizen",
   "publishConfig": {
     "access": "public"
   },
@@ -17,6 +22,7 @@
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
+    "test": "npm run build && node --test",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
     "inspect": "npx @modelcontextprotocol/inspector node dist/index.js"
@@ -34,6 +40,6 @@
     "node": ">=20"
   },
   "files": ["dist", "data"],
-  "keywords": ["horizen", "mcp", "blockchain", "web3"],
+  "keywords": ["horizen", "mcp", "mcp-server", "model-context-protocol", "ai-agents", "blockchain", "web3", "evm", "op-stack", "zkverify", "stork"],
   "license": "MIT"
 }
