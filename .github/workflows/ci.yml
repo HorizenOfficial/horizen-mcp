@@ -5,14 +5,8 @@ on:
     branches: [main]
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
-      - '.gitignore'
 
-# Cancel an older run when a new commit lands on the same branch or PR.
+# Cancel an older run when a newer commit lands on main before it finishes.
 # Tags are never cancelled, so a release in progress always finishes.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
