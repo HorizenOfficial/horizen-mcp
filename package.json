@@ -40,6 +40,6 @@
     "node": ">=20"
   },
   "files": ["dist", "data"],
-  "keywords": ["horizen", "mcp", "mcp-server", "model-context-protocol", "ai-agents", "blockchain", "web3", "evm", "op-stack", "zkverify", "stork"],
+  "keywords": ["horizen", "mcp", "blockchain", "web3"],
   "license": "MIT"
 }
