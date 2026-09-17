@@ -1,0 +1,125 @@
+name: Build, Test and Publish
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+# Cancel an older run when a newer commit lands on main before it finishes.
+# Tags are never cancelled, so a release in progress always finishes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    permissions: {}
+
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build and test
+        run: npm test
+
+  release:
+    name: Publish to npm and GitHub
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    environment: npm-publish
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Verify release tag (on main, version match, maintainer signature)
+        env:
+          MAINTAINERS_KEYS: ${{ vars.MAINTAINERS_KEYS }}
+        run: |
+          set -euo pipefail
+
+          # Tag must point to a commit that is on main.
+          git fetch --quiet origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "::error::Tag ${GITHUB_REF_NAME} is not on main. Merge to main, then tag the merged commit." >&2
+            exit 1
+          fi
+
+          # Tag version must match package.json.
+          tag_version="${GITHUB_REF_NAME#v}"
+          pkg_version="$(node -p "require('./package.json').version")"
+          if [ "${tag_version}" != "${pkg_version}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${pkg_version}." >&2
+            exit 1
+          fi
+
+          # Tag must be GPG-signed by a maintainer key.
+          if [ -z "${MAINTAINERS_KEYS}" ]; then
+            echo "::error::MAINTAINERS_KEYS is not set; refusing to publish an unverified tag." >&2
+            exit 1
+          fi
+          for key in ${MAINTAINERS_KEYS}; do
+            if ! [[ "${key}" =~ ^[0-9A-Fa-f]{40}$ ]]; then
+              echo "::error::MAINTAINERS_KEYS entry is not a 40-hex fingerprint: ${key}" >&2
+              exit 1
+            fi
+            gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "${key}" \
+              || gpg --batch --keyserver hkps://keyserver.ubuntu.com --recv-keys "${key}" \
+              || { echo "::error::Could not fetch maintainer key ${key}" >&2; exit 1; }
+          done
+          if ! git verify-tag "${GITHUB_REF_NAME}"; then
+            echo "::error::Tag ${GITHUB_REF_NAME} is not signed by a known maintainer key." >&2
+            exit 1
+          fi
+          echo "Tag ${GITHUB_REF_NAME} verified: on main, version ${pkg_version}, maintainer-signed."
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish to npm (OIDC trusted publishing)
+        run: npm publish --provenance --access public --ignore-scripts
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --generate-notes --verify-tag

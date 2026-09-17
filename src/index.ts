@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createRequire } from "node:module";
 import { z } from "zod";
+
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json") as { version: string };
 
 import { chainInputSchema, handleGetChainInfo } from "./tools/chain.js";
 import {
@@ -24,10 +28,13 @@ import { tokenInputSchema, handleGetTokenInfo } from "./tools/tokens.js";
 
 const SERVER_INSTRUCTIONS = `Horizen chain reference data. All values include \`source\` and \`verified\` fields — surface them when reporting facts to the user. This server returns reference data only; it does not construct, sign, or broadcast transactions. Values not present in this server must not be inferred — query again with different parameters, or tell the user the value is unavailable. Some integrations are live on Horizen but not yet documented in Horizen's own docs. For these, referencePath and tutorialPath are null while status is "live". Report these as available-but-undocumented and direct the user to externalDocs. Never construct a docs.horizen.io URL that is not present in this registry.`;
 
-const server = new McpServer({
-  name: "horizen-mcp",
-  version: "0.2.0",
-});
+const server = new McpServer(
+  {
+    name: "horizen-mcp",
+    version,
+  },
+  { instructions: SERVER_INSTRUCTIONS }
+);
 
 server.tool(
   "get_chain_info",
@@ -91,11 +98,11 @@ server.tool(
 
 server.tool(
   "fetch_stork_price",
-  "Perform an authenticated pull from the Stork REST API to get a live signed price update for an asset. Returns the full signed payload with each field annotated with its correct Solidity type (timestampNs as uint64 in nanoseconds; quantizedValue as int192 — not uint256). Use the solidityCallData field directly when constructing an updateTemporalNumericValueV1 call.",
+  "Perform an authenticated pull from the Stork REST API to get a live signed price update for an asset. Reads the Stork API key from the STORK_API_KEY environment variable (not a tool argument). Returns the full signed payload with each field annotated with its correct Solidity type (timestampNs as uint64 in nanoseconds; quantizedValue as int192 — not uint256). Use the solidityCallData field directly when constructing an updateTemporalNumericValueV1 call.",
   storkPriceInputSchema.shape,
   async (input) => {
     const result = await handleFetchStorkPrice(
-      input as { assetId: string; apiKey: string; baseUrl?: string }
+      input as { assetId: string; baseUrl?: string }
     );
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
   }
